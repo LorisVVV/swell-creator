@@ -22,3 +22,5 @@ declare module '*.fs' {
   const content: string;
   export default content;
 }
+
+declare module 'react-fps-stats';

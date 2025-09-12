@@ -32,7 +32,6 @@ vec3 calculPosition(float alpha, float beta, Wave waves[MAX_WAVES], int listSize
 		// mat3 currentwaveMatrix = waves[i];
 		// Wave currentwave = Wave(vec2(currentwaveMatrix[0][0], currentwaveMatrix[1][0]), currentwaveMatrix[2][0], currentwaveMatrix[0][1], currentwaveMatrix[1][1], currentwaveMatrix[2][1] );
 
-
 		Wave currentwave = waves[i];
 
 		float om = currentwave.vecteurDirection.x * alpha + currentwave.vecteurDirection.y * beta - currentwave.angularFrequency * time - currentwave.phase;
