@@ -1,7 +1,8 @@
 import {useFrame } from "@react-three/fiber";
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { CustomMaterial, CustomShaderMaterial, CustomMaterialType } from '../shaders/shaderMaterial'
 import { Mesh, Vector2 } from "three";
+import GUI from "lil-gui";
 
 export default function Wave() {
     const size = 64;
@@ -32,21 +33,6 @@ export default function Wave() {
         amplitude : 0.0,
         phase : 0.0,
         angularFrequency : 0.0
-    }
-
-
-    const wave1:Wave = {
-        vecteurDirection :  new Vector2(-0.5, 0.5),
-        amplitude : 0.5,
-        phase : 1.0,
-        angularFrequency : 1.5
-    }
-
-    const wave2:Wave = {
-        vecteurDirection :  new Vector2(1.0, 0.0),
-        amplitude : 0.5,
-        phase : 1.0,
-        angularFrequency : 1.5
     }
 
     // Main array, put all your waves in there
@@ -97,6 +83,35 @@ export default function Wave() {
         }
     }
 
+
+
+    // GUI
+    useEffect(() => {
+        const gui = new GUI()
+
+        if (material.current) {
+            const wavesFolder = gui.addFolder("Waves");
+            const waves:Wave[] = material.current.uniforms.uWaves.value;
+
+            for (let index = 0; index < wavesLength; index++) {
+                const wave = waves[index];
+
+                const itemFolder = wavesFolder.addFolder(`Wave ${index + 1}`);
+                const VecteurDirection = itemFolder.addFolder(`VecteurDirection`);
+                VecteurDirection.add(wave.vecteurDirection,"x", -1, 1);
+                VecteurDirection.add(wave.vecteurDirection,"y", -1, 1);
+                itemFolder.add(wave, "amplitude", 0, 10);
+                itemFolder.add(wave, "angularFrequency", 0, 10);
+                itemFolder.add(wave, "phase", 0, 10);
+
+                
+            }
+
+        }
+        return () => {
+            gui.destroy()
+        }
+    }, [])
 
     return(
         <>
