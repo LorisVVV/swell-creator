@@ -4,7 +4,20 @@ import { CustomMaterial, CustomShaderMaterial, CustomMaterialType } from '../sha
 import { Mesh, Vector2 } from "three";
 import GUI from "lil-gui";
 
-export default function Wave() {
+interface Wave {
+    vecteurDirection : Vector2 ,
+    waveNumber? : number,
+    amplitude : number,
+    phase : number,
+    angularFrequency : number
+};
+
+// Function to calculate the wave number
+function calculWavenumber(x:number, y:number) {
+    return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+}
+
+export default function Wave({debug = false}:{debug?:boolean}) {
     const size = 64;
     const MAX_WAVES = 32; // Make sure that there is the same constant in the shaders
 
@@ -18,13 +31,6 @@ export default function Wave() {
         }
     })
 
-    interface Wave {
-    	vecteurDirection : Vector2 ,
-        waveNumber? : number,
-        amplitude : number,
-        phase : number,
-        angularFrequency : number
-    };
 
     // Use to fill the array so that it has the right length (MAX_WAVES)
     const emptyWave:Wave = {
@@ -54,12 +60,13 @@ export default function Wave() {
             amplitude : 0.05,
             phase : 2.0,
             angularFrequency : 0.5
-        }
+        },
+        
     ]
 
     // For each waves it calculate the wavenumber
     waves.forEach((wave) => {
-        wave.waveNumber = Math.sqrt(Math.pow(wave.vecteurDirection.x,2) + Math.pow(wave.vecteurDirection.y,2));
+        wave.waveNumber = calculWavenumber(wave.vecteurDirection.x,wave.vecteurDirection.y,);
     });
 
     // Keeping the length of the array before filling it with the empty waves
@@ -98,9 +105,15 @@ export default function Wave() {
 
                 const itemFolder = wavesFolder.addFolder(`Wave ${index + 1}`);
                 const VecteurDirection = itemFolder.addFolder(`VecteurDirection`);
-                VecteurDirection.add(wave.vecteurDirection,"x", -1, 1);
-                VecteurDirection.add(wave.vecteurDirection,"y", -1, 1);
-                itemFolder.add(wave, "amplitude", 0, 10);
+                VecteurDirection.add(wave.vecteurDirection,"x", -1, 1)
+                                .onChange( (value:number) => {
+                                    wave.waveNumber= calculWavenumber(value, wave.vecteurDirection.y)
+                                } );
+                VecteurDirection.add(wave.vecteurDirection,"y", -1, 1)
+                                .onChange( (value:number) => {
+                                    wave.waveNumber= calculWavenumber(wave.vecteurDirection.x, value)
+                                } );
+                itemFolder.add(wave, "amplitude", 0, 2);
                 itemFolder.add(wave, "angularFrequency", 0, 10);
                 itemFolder.add(wave, "phase", 0, 10);
 
@@ -113,6 +126,7 @@ export default function Wave() {
         }
     }, [])
 
+    
     return(
         <>
             <mesh ref={mesh} position={[0, 0, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow>
@@ -120,9 +134,8 @@ export default function Wave() {
                 <CustomMaterial 
                     key={CustomShaderMaterial.key} 
                     ref={material}
-                    wireframe={true} 
+                    wireframe={debug} 
                     uniforms={uniforms}
-                    
                     />
             </mesh>
         </>
