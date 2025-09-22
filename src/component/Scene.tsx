@@ -16,8 +16,8 @@ export default function Scene({readFile}:{readFile:Function}) {
               camera={{
                 position: [-6, 7, 7],
               }}
-                   
-            >      
+            >
+
               <Wave debug readFile={readFile}/>
               <ambientLight intensity={2} />
               <OrbitControls/>   
