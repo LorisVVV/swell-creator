@@ -57,43 +57,72 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
 
     // Main array, put all your waves in there
     const waves:Wave[] = [
-        // {
-        //     vecteurDirection :  new Vector2(-0.25, 0.25),
-        //     amplitude : 0.5,
-        //     phase : 1.0,
-        //     angularFrequency : 1.5
-        // },
-        // {
-        //     vecteurDirection :  new Vector2(1.0, 0.0),
-        //     amplitude : 0.25,
-        //     phase : 2.0,
-        //     angularFrequency : 1.5
-        // },
-        // {
-        //     vecteurDirection :  new Vector2(-1.0, -0.5),
-        //     amplitude : 0.05,
-        //     phase : 2.0,
-        //     angularFrequency : 0.5
-        // },
-        // {
-        //     vecteurDirection :  new Vector2(-1.0, -0.5),
-        //     amplitude : 0.05,
-        //     phase : 2.0,
-        //     angularFrequency : 0.5
-        // },
-        // {
-        //     vecteurDirection :  new Vector2(-1.0, -0.5),
-        //     amplitude : 0.05,
-        //     phase : 2.0,
-        //     angularFrequency : 0.5
-        // },
-        // {
-        //     vecteurDirection :  new Vector2(-1.0, -0.5),
-        //     amplitude : 0.05,
-        //     phase : 2.0,
-        //     angularFrequency : 0.5
-        // },
-        
+        {
+            vecteurDirection: new Vector2(
+                1.0,
+                0.0
+            ),
+            waveNumber: 1,
+            amplitude: 1.244,
+            phase: 2.17,
+            angularFrequency: 0.73,
+            waveLength: 0.17
+        },
+        {
+            vecteurDirection: new Vector2(
+                1.0,
+                0.0
+            ),
+            waveNumber: 1,
+            amplitude: 0.226,
+            phase: 0,
+            angularFrequency: 5.69,
+            waveLength: 0.76
+        },
+        {
+            vecteurDirection: new Vector2(
+                1.0,
+                -0.558
+            ),
+            waveNumber: 1.1451480253661535,
+            amplitude: 0.33,
+            phase: 0,
+            angularFrequency: 0.73,
+            waveLength: 0.5
+        },
+        {
+            vecteurDirection: new Vector2(
+                0.582,
+                -0.474
+            ),
+            waveNumber: 0.7505997601918082,
+            amplitude: 0.146,
+            phase: 5.95,
+            angularFrequency: 0.6,
+            waveLength: 1.87
+        },
+        {
+            vecteurDirection: new Vector2(
+                0.11,
+                -0.502
+            ),
+            waveNumber: 0.5139104980441633,
+            amplitude: 0.2,
+            phase: 4.91,
+            angularFrequency: 1,
+            waveLength: 1.085
+        },
+        {
+            vecteurDirection: new Vector2(
+                -0.224,
+                -0.502
+            ),
+            waveNumber: 0.5497090139337357,
+            amplitude: 0.564,
+            phase: 0.86,
+            angularFrequency: 0.34,
+            waveLength: 0.825
+        }
     ]
 
     // For each waves it calculate the wavenumber

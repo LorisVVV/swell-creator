@@ -2,7 +2,13 @@
 // Max number of waves
 #define MAX_WAVES 32
 
-varying vec3 vPosition;
+// in vec3 position;
+// in mat4 projectionMatrix;
+// in mat4 modelViewMatrix;
+
+out vec3 vUv;
+out vec3 vPosition;
+
 
 uniform float uTime;
 
