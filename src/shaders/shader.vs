@@ -2,13 +2,10 @@
 // Max number of waves
 #define MAX_WAVES 32
 
-// in vec3 position;
-// in mat4 projectionMatrix;
-// in mat4 modelViewMatrix;
-
-out vec3 vUv;
 out vec3 vPosition;
-
+out vec3 vNormal;
+out vec3 vDisplacement;
+// out float vIsCrest;
 
 uniform float uTime;
 
@@ -24,7 +21,6 @@ struct Wave {
 uniform Wave uWaves[MAX_WAVES];
 
 uniform int uWavesListSize;
-
 
 vec3 calculPosition(float alpha, float beta, Wave waves[MAX_WAVES], int listSize, float time) {
 
@@ -52,16 +48,37 @@ vec3 calculPosition(float alpha, float beta, Wave waves[MAX_WAVES], int listSize
 		waveOffsetZ += currentWaveOffsetZ;
 		
 		waveOffsetY += currentWaveOffsetY;
+
+
+		// if (currentWaveOffsetY > currentwave.amplitude-0.0001) {
+		// 	vIsCrest = 1.0;
+		// }
 	}
 
 	return vec3(alpha - waveOffsetX, beta - waveOffsetZ, waveOffsetY);
 }
 
-void main() {
-	vPosition = position;
-	vec3 newPosition;
+vec3 getNormal(vec3 newPosition) {
+	vec3 tangent = calculPosition(position.x+1.0, position.y, uWaves, uWavesListSize, uTime) - newPosition;
+	vec3 bitangent = calculPosition(position.x, position.y+1.0, uWaves, uWavesListSize, uTime) - newPosition;
 
-	newPosition = calculPosition(vPosition.x, vPosition.y, uWaves, uWavesListSize, uTime);
+	return normalize(cross(tangent, bitangent));
+}
+
+void main() {
+
+	//Calculate position
+	vec3 newPosition;
+	newPosition = calculPosition(position.x, position.y, uWaves, uWavesListSize, uTime);
+
+	vDisplacement = position - newPosition;
+
+
+	vec3 normal = getNormal(newPosition);
+
+	vNormal = normal;
+
 	vPosition = newPosition;
+
 	gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition.xyz, 1.0 );
 }
