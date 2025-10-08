@@ -1,5 +1,5 @@
 import {useFrame } from "@react-three/fiber";
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CustomMaterial, CustomShaderMaterial, CustomMaterialType } from '../shaders/shaderMaterial'
 import { Mesh, Vector2, Vector3 } from "three";
 import GUI from "lil-gui";
@@ -19,15 +19,18 @@ function calculWavenumber(x:number, y:number) {
     return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
 }
 
-export default function Wave({debug = false, readFile}:{debug?:boolean, readFile:Function}) {
+export default function Wave({debug = false, readFile, saveData, getDataFile}:{debug?:boolean, readFile:Function, saveData:Function, getDataFile:Function}) {
     const size = 64;
     const MAX_WAVES = 32; // Make sure that there is the same constant in the shaders
     const GRAVITY = 9.81;
 
+    // Refs
     const mesh = useRef<Mesh>(null!)
     const material = useRef<CustomMaterialType>(null!)
+    const dataFiles = useRef<string[]>([]);
 
-        const wavesData1:Wave[] = [
+    // Example of a waves data
+    const wavesData1:Wave[] = [
         {
             vecteurDirection: new Vector2(
                 1.0,
@@ -96,14 +99,6 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
         }
     ]
 
-    // Clock to animate the shader
-    useFrame(({clock}) => {
-        if (material.current) {
-            material.current.uniforms.uTime.value = clock.getElapsedTime();
-        }
-    })
-
-
     // Use to fill the array so that it has the right length (MAX_WAVES)
     const emptyWave:Wave = {
         vecteurDirection :  new Vector2(0.0, 0.0),
@@ -115,8 +110,7 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
     }
 
     // Main array, put all your waves in there
-    const waves:Wave[] = wavesData1
-    // waves = wavesData1;
+    const waves:Wave[] = []
 
 
     // For each waves it calculate the wavenumber
@@ -126,7 +120,7 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
     });
 
     // Keeping the length of the array before filling it with the empty waves
-    let wavesLength = waves.length;
+    let wavesListSize = waves.length;
 
     // Filling the array with empty waves so the lenght is equal to MAX_WAVES
     while (waves.length < MAX_WAVES) {
@@ -138,7 +132,7 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
     // Uniforms to send to the shader
     const uniforms = {
         uWavesListSize : {
-            value : wavesLength
+            value : wavesListSize
         },
         uWaves : {
             value : waves
@@ -155,11 +149,12 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
 
     // GUI
     useEffect(() => {
+        // Gui creation
         const gui = new GUI()
 
         if (material.current) {
 
-            let waves:Wave[] = material.current.uniforms.uWaves.value;
+            // let waves:Wave[] = material.current.uniforms.uWaves.value;
             let size:number = material.current.uniforms.uWavesListSize.value;
             let color:Vector3 = material.current.uniforms.uColor.value;
 
@@ -167,38 +162,47 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
                 colorWave: { r: color.x, g: color.y, b: color.z },
             };
 
-
+            // Object for control 
             const controlFunction = {
                 addWave() {
                     if (size <= MAX_WAVES) {
                         let newSize = size + 1;
                         material.current.uniforms.uWavesListSize.value = newSize;
-                        wavesLength = newSize;
+                        wavesListSize = newSize;
                         size = newSize;
                     }
-
                 },
                 removeWave() {
                     if (size > 0 ) {
                         let newSize = size - 1;
                         material.current.uniforms.uWavesListSize.value = newSize;
-                        wavesLength = newSize;
+                        wavesListSize = newSize;
                         size = newSize;
                     }
 
                 },
                 async loadData() {
-                    const data = await readFile('../data/data.json');
-                    console.log(data)
-                    // material.current.uniforms.uWaves.value = data.toJSON()
+                    const data = await readFile(this.filename);
+
+                    if (data != "nodata") {
+                        const jsonData = JSON.parse(data);
+
+                        material.current.uniforms.uWaves.value = jsonData.uWaves.value;
+                        material.current.uniforms.uWavesListSize.value = jsonData.uWavesListSize.value;
+                    }
                 },
-                log() {
-                    console.log(material.current.uniforms)
-                }
+                async saveData() {
+                    const data = material.current.uniforms;
+                    saveData(JSON.stringify(data))
+                    loadDataFiles()
+                },
+                filename : "none"
             }
 
+
+            // Load functions
             function loadWaveFolder() {
-                for (let index = 0; index < wavesLength; index++) {
+                for (let index = 0; index < wavesListSize; index++) {
                     const wave = material.current.uniforms.uWaves.value[index];
 
 
@@ -213,10 +217,10 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
                                     .onChange( (value:number) => {
                                         wave.waveNumber= calculWavenumber(wave.vecteurDirection.x, value)
                                     } );
-                    itemFolder.add(wave, "amplitude",0,2)
+                    itemFolder.add(wave, "amplitude",0,10)
                     itemFolder.add(wave, "angularFrequency", 0, 10);
                     itemFolder.add(wave, "phase", 0, 10);
-                    itemFolder.add(wave, "waveLength", 0, 5);
+                    itemFolder.add(wave, "waveLength", 0.01, 120);
                     // itemFolder.onChange(() => {
                     //     console.log("Uniforms : ")
                     //     console.dir(material.current.uniforms)
@@ -226,44 +230,63 @@ export default function Wave({debug = false, readFile}:{debug?:boolean, readFile
                 }
             }
 
+            async function loadDataFiles() {
+                dataFiles.current = await getDataFile();
+                
+                dataFolderController.options(dataFiles.current)
+                dataFolderController.updateDisplay()
+            }
+
+            // Add/Remove wave controls
             gui.add(controlFunction, "addWave").onChange(() => {
                 wavesFolder.destroy();
                 wavesFolder = gui.addFolder("Waves");
                 loadWaveFolder()
-                // console.dir(material.current.uniforms)
             });
 
             gui.add(controlFunction, "removeWave").onChange(() => {
                 wavesFolder.destroy();
                 wavesFolder = gui.addFolder("Waves");
                 loadWaveFolder()
-                // console.dir(material.current.uniforms)
             });
 
-            gui.addColor(colorFormats, "colorWave");
 
-            gui.add(controlFunction, "log").onChange(() => {})
+            // Colors
+            gui.addColor(colorFormats, "colorWave").onChange(() => {
+                material.current.uniforms.uColor.value = new Vector3(colorFormats.colorWave.r, colorFormats.colorWave.g, colorFormats.colorWave.b)
+            });
 
-            // const dataFolder = gui.addFolder("dataFolder");
+            // Data folder
+            const dataFolder = gui.addFolder("dataFolder");
 
-            // dataFolder.add(controlFunction, "loadData")
+            let dataFolderController = dataFolder.add(controlFunction, 'filename', dataFiles.current)
 
+            loadDataFiles()
+
+            dataFolder.add(controlFunction, "loadData")
+            dataFolder.add(controlFunction, "saveData")
+
+
+            // Wave folder
             let wavesFolder = gui.addFolder("Waves");
             loadWaveFolder();
-
-
 
         }
 
         return () => {
             gui.destroy()
         }
+
     }, [])
 
-    // console.log(mesh)
-    // if (mesh.current) {
-    //     mesh.current.geometry.attributes.normal.normalized = true;
-    // }
+
+    // Clock to animate the shader
+    useFrame(({clock}) => {
+        if (material.current) {
+            material.current.uniforms.uTime.value = clock.getElapsedTime();
+        }
+    })
+
     return(
         <>
             <mesh ref={mesh} position={[0, 0, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>

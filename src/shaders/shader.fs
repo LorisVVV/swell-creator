@@ -35,7 +35,7 @@ void main() {
 	vec3 specularLighting = speculareStrength * lightColor;
 
 	// Lighting
-	vec3 lighting = ambientLighting *1.0 + diffuseLighting*0.5 + specularLighting*1.0 ;
+	vec3 lighting = ambientLighting *0.5 + diffuseLighting*0.5 + specularLighting*1.0 ;
 
 	// vec3 modelColor = vec3(vec2(-vDisplacement.z),1.0);
 	vec3 modelColor = uColor; 

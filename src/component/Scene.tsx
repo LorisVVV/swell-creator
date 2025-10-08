@@ -7,7 +7,7 @@ import { OrbitControls } from "@react-three/drei";
 import FPSStats from "react-fps-stats";
 import { Environment } from '@react-three/drei';
 
-export default function Scene({readFile}:{readFile:Function}) {
+export default function Scene({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
     return (
         <div className={styles.scene}>
 
@@ -42,7 +42,7 @@ export default function Scene({readFile}:{readFile:Function}) {
                 />
 
 
-              <Wave readFile={readFile} />
+              <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile}/>
 
               {/* <mesh position={[0, 1.244, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>
                 <planeGeometry args={[100, 100, 100, 100]}/>

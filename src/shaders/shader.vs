@@ -35,7 +35,11 @@ vec3 calculPosition(float alpha, float beta, Wave waves[MAX_WAVES], int listSize
 
 		Wave currentwave = waves[i];
 
-		float om = currentwave.vecteurDirection.x * alpha * currentwave.waveLength + currentwave.vecteurDirection.y * beta * currentwave.waveLength  - currentwave.angularFrequency * time - currentwave.phase;
+		// float om = currentwave.vecteurDirection.x * alpha * currentwave.waveLength + currentwave.vecteurDirection.y * beta * currentwave.waveLength  - currentwave.angularFrequency * time - currentwave.phase;
+
+		// Real wave length
+		float om = currentwave.vecteurDirection.x * alpha * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * beta * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time - currentwave.phase;
+
 
 		float currentWaveOffsetX = (currentwave.vecteurDirection.x / currentwave.waveNumber ) * currentwave.amplitude * sin(om);
 		
