@@ -108,6 +108,56 @@ vec3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int l
 }
 
 
+vec3 computePositionByBandNewWay(float alpha, float beta, Wave waves[MAX_WAVES], int listSize, float time) {
+
+	vec3 newPosition = vec3(alpha, beta, 0.0);	
+
+	int bandSize = 1;
+	int index = 0;
+
+	for(int i = 0; i < uNbBand+1; i++) {
+
+		float waveOffsetX = 0.0;
+
+		float waveOffsetZ = 0.0;
+
+		float waveOffsetY = 0.0;
+
+		int j = index;
+		int endOfBand = index + bandSize;
+		while (j < endOfBand && j < listSize) {
+			Wave currentwave = waves[j];
+
+			// Real wave length
+			float om = currentwave.vecteurDirection.x * newPosition.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * newPosition.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time - currentwave.phase;
+
+
+			float currentWaveOffsetX = (currentwave.vecteurDirection.x / currentwave.waveNumber ) * currentwave.amplitude * sin(om);
+			
+			float currentWaveOffsetZ = (currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(om);
+			
+			float currentWaveOffsetY = currentwave.amplitude * cos(om);
+
+			waveOffsetX += currentWaveOffsetX;
+
+			waveOffsetZ += currentWaveOffsetZ;
+			
+			waveOffsetY += currentWaveOffsetY;
+
+
+			j++;
+			index++;
+		}
+
+		newPosition = vec3(newPosition.x - waveOffsetX, newPosition.y - waveOffsetZ, newPosition.z+waveOffsetY);
+	
+		bandSize = bandSize + 2;
+	}
+
+	return newPosition;
+}
+
+
 
 vec3 getNormal(vec3 newPosition) {
 	vec3 tangent = calculPosition(position.x+1.0, position.y, uWaves, uWavesListSize, uTime) - newPosition;
@@ -115,6 +165,14 @@ vec3 getNormal(vec3 newPosition) {
 
 	return normalize(cross(tangent, bitangent));
 }
+
+vec3 getNormalByNewNewWayFunc(vec3 newPosition) {
+	vec3 tangent = computePositionByBandNewWay(position.x+1.0, position.y, uWaves, uWavesListSize, uTime) - newPosition;
+	vec3 bitangent = computePositionByBandNewWay(position.x, position.y+1.0, uWaves, uWavesListSize, uTime) - newPosition;
+
+	return normalize(cross(tangent, bitangent));
+}
+
 
 vec3 getNormalByNewFunc(vec3 newPosition) {
 	vec3 tangent = computePositionByBand(position.x+1.0, position.y, uWaves, uWavesListSize, uTime) - newPosition;
@@ -128,12 +186,14 @@ void main() {
 	//Calculate position
 	vec3 newPosition;
 	// newPosition = calculPosition(position.x, position.y, uWaves, uWavesListSize, uTime);
-	newPosition = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
+	// newPosition = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
+	newPosition = computePositionByBandNewWay(position.x, position.y, uWaves, uWavesListSize, uTime);
 
 	vDisplacement = position - newPosition;
 
 
-	vec3 normal = getNormalByNewFunc(newPosition);
+	// vec3 normal = getNormalByNewFunc(newPosition);
+	vec3 normal = getNormalByNewNewWayFunc(newPosition);
 
 	vNormal = normal;
 

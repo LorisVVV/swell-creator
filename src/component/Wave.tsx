@@ -155,7 +155,7 @@ export default function Wave({debug = false, animate, readFile, saveData, getDat
 
     const vecteurDirection = new Vector2(1.0, 0.0);
     const waveNumber = calculWavenumber(vecteurDirection.x, vecteurDirection.y);
-    const amplitude = 5.0;
+    const amplitude = 10.0;
     const phase = 1;
     const angularFrequency = Math.sqrt(GRAVITY * waveNumber)
     const waveLength = 50.0;
