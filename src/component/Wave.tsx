@@ -60,7 +60,7 @@ function generateGernsterWave(nbBands:number, firstWave:Wave) {
     return waves;
 }
 
-export default function Wave({debug = false, readFile, saveData, getDataFile}:{debug?:boolean, readFile:Function, saveData:Function, getDataFile:Function}) {
+export default function Wave({debug = false, animate, readFile, saveData, getDataFile}:{debug?:boolean, animate:any, readFile:Function, saveData:Function, getDataFile:Function}) {
     const size = 128;
     const MAX_WAVES = 32; // Make sure that there is the same constant in the shaders
     const GRAVITY = 9.81;
@@ -356,10 +356,12 @@ export default function Wave({debug = false, readFile, saveData, getDataFile}:{d
 
     // Clock to animate the shader
     useFrame(({clock}) => {
-        if (material.current) {
+        if (material.current && animate.current) {
             material.current.uniforms.uTime.value = clock.getElapsedTime();
         }
     })
+
+
 
     return(
         <>

@@ -6,9 +6,31 @@ import Wave from "@/component/Wave";
 import { OrbitControls } from "@react-three/drei";
 import FPSStats from "react-fps-stats";
 import { Environment } from '@react-three/drei';
+import { useEffect, useRef } from "react";
 
 export default function Scene({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
-    return (
+  
+  const animate = useRef(true);
+
+  useEffect(() => {
+    const handleKeyDown = (e:KeyboardEvent) => {
+        if (e.key == " ") {
+          animate.current = !animate.current
+        }
+
+        console.log(animate.current?"The animation is playing":"The animation is paused")
+      }
+
+
+    document.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+    };
+
+  }, [])
+
+  return (
         <div className={styles.scene}>
 
           <FPSStats />
@@ -42,7 +64,7 @@ export default function Scene({readFile, saveData, getDataFile}:{readFile:Functi
                 />
 
 
-              <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile} />
+              <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile} animate={animate} />
 
               {/* <mesh position={[0, 1.244, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>
                 <planeGeometry args={[100, 100, 100, 100]}/>
@@ -51,7 +73,7 @@ export default function Scene({readFile, saveData, getDataFile}:{readFile:Functi
               </mesh> */}
               
             </Canvas>
-            
+
         </div>
     )
 }

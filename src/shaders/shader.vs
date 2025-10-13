@@ -116,6 +116,13 @@ vec3 getNormal(vec3 newPosition) {
 	return normalize(cross(tangent, bitangent));
 }
 
+vec3 getNormalByNewFunc(vec3 newPosition) {
+	vec3 tangent = computePositionByBand(position.x+1.0, position.y, uWaves, uWavesListSize, uTime) - newPosition;
+	vec3 bitangent = computePositionByBand(position.x, position.y+1.0, uWaves, uWavesListSize, uTime) - newPosition;
+
+	return normalize(cross(tangent, bitangent));
+}
+
 void main() {
 
 	//Calculate position
@@ -126,7 +133,7 @@ void main() {
 	vDisplacement = position - newPosition;
 
 
-	vec3 normal = getNormal(newPosition);
+	vec3 normal = getNormalByNewFunc(newPosition);
 
 	vNormal = normal;
 
