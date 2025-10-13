@@ -11,7 +11,7 @@ interface Wave {
     amplitude : number,
     phase : number,
     angularFrequency : number,
-    waveLength?: number
+    waveLength: number
 };
 
 // Function to calculate the wave number
@@ -19,8 +19,49 @@ function calculWavenumber(x:number, y:number) {
     return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
 }
 
+function generateGernsterWave(nbBands:number, firstWave:Wave) {
+    const GRAVITY = 9.81;
+
+    let waves:Wave[] = [firstWave]
+    let nbWavesByBands = 3;
+
+
+    for (let i = 0; i < nbBands; i++) {
+
+        const angle = Math.PI * 2 / nbWavesByBands;
+
+        for (let j = 0; j < nbWavesByBands; j++) {
+            const lastWave = waves[waves.length - 1];
+
+            const vecteurDirection = new Vector2(Math.cos(angle * (j + 1)), Math.sin(angle * (j + 1)));
+            const waveNumber = calculWavenumber(vecteurDirection.x, vecteurDirection.y);
+            const amplitude = lastWave.amplitude / 2;
+            const phase = 1;
+            const angularFrequency = Math.sqrt(GRAVITY * waveNumber)
+            const waveLength = lastWave.waveLength / 2;
+
+            waves.push(
+                {
+                    vecteurDirection: vecteurDirection,
+                    waveNumber: waveNumber,
+                    amplitude: amplitude,
+                    phase: phase,
+                    angularFrequency: angularFrequency,
+                    waveLength: waveLength
+
+                }
+            )
+        }
+
+
+        nbWavesByBands += 2;
+    }
+
+    return waves;
+}
+
 export default function Wave({debug = false, readFile, saveData, getDataFile}:{debug?:boolean, readFile:Function, saveData:Function, getDataFile:Function}) {
-    const size = 64;
+    const size = 128;
     const MAX_WAVES = 32; // Make sure that there is the same constant in the shaders
     const GRAVITY = 9.81;
 
@@ -109,15 +150,41 @@ export default function Wave({debug = false, readFile, saveData, getDataFile}:{d
         waveLength : 0.0,
     }
 
+
+
+
+    const vecteurDirection = new Vector2(1.0, 0.0);
+    const waveNumber = calculWavenumber(vecteurDirection.x, vecteurDirection.y);
+    const amplitude = 5.0;
+    const phase = 1;
+    const angularFrequency = Math.sqrt(GRAVITY * waveNumber)
+    const waveLength = 50.0;
+
+    const firstWave = {
+                    vecteurDirection: vecteurDirection,
+                    waveNumber: waveNumber,
+                    amplitude: amplitude,
+                    phase: phase,
+                    angularFrequency: angularFrequency,
+                    waveLength: waveLength
+                }
+
+
+    const generateWaves = generateGernsterWave(3, firstWave);
+    
+    
+    console.dir(
+        generateWaves
+    )
+
     // Main array, put all your waves in there
-    const waves:Wave[] = []
+    const waves:Wave[] = [...generateWaves]
 
-
-    // For each waves it calculate the wavenumber
-    waves.forEach((wave) => {
-        wave.waveNumber = calculWavenumber(wave.vecteurDirection.x,wave.vecteurDirection.y,);
-        wave.angularFrequency = Math.sqrt(GRAVITY * wave.waveNumber)
-    });
+    // For each waves it calculate the wavenumber and agular frequency
+    // waves.forEach((wave) => {
+    //     wave.waveNumber = calculWavenumber(wave.vecteurDirection.x,wave.vecteurDirection.y,);
+    //     wave.angularFrequency = Math.sqrt(GRAVITY * wave.waveNumber)
+    // });
 
     // Keeping the length of the array before filling it with the empty waves
     let wavesListSize = waves.length;
@@ -142,6 +209,9 @@ export default function Wave({debug = false, readFile, saveData, getDataFile}:{d
         },
         uColor : {
             value : new Vector3(0.0, 0.0, 1.0)
+        },
+        uNbBand : {
+            value : 3.0
         }
     }
 
@@ -190,6 +260,10 @@ export default function Wave({debug = false, readFile, saveData, getDataFile}:{d
                         material.current.uniforms.uWaves.value = jsonData.uWaves.value;
                         material.current.uniforms.uWavesListSize.value = jsonData.uWavesListSize.value;
                     }
+
+                    wavesFolder.destroy();
+                    wavesFolder = gui.addFolder("Waves");
+                    loadWaveFolder()
                 },
                 async saveData() {
                     const data = material.current.uniforms;

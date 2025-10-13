@@ -42,7 +42,7 @@ export default function Scene({readFile, saveData, getDataFile}:{readFile:Functi
                 />
 
 
-              <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile}/>
+              <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile} />
 
               {/* <mesh position={[0, 1.244, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>
                 <planeGeometry args={[100, 100, 100, 100]}/>
