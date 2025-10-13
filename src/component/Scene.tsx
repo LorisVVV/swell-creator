@@ -10,25 +10,9 @@ import { useEffect, useRef } from "react";
 
 export default function Scene({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
   
-  const animate = useRef(true);
-
-  useEffect(() => {
-    const handleKeyDown = (e:KeyboardEvent) => {
-        if (e.key == " ") {
-          animate.current = !animate.current
-        }
-
-        console.log(animate.current?"The animation is playing":"The animation is paused")
-      }
 
 
-    document.addEventListener('keydown', handleKeyDown, true);
-
-    return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-    };
-
-  }, [])
+  
 
   return (
         <div className={styles.scene}>
@@ -64,7 +48,7 @@ export default function Scene({readFile, saveData, getDataFile}:{readFile:Functi
                 />
 
 
-              <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile} animate={animate} />
+              <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile} />
 
               {/* <mesh position={[0, 1.244, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>
                 <planeGeometry args={[100, 100, 100, 100]}/>

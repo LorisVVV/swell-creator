@@ -60,7 +60,7 @@ function generateGernsterWave(nbBands:number, firstWave:Wave) {
     return waves;
 }
 
-export default function Wave({debug = false, animate, readFile, saveData, getDataFile}:{debug?:boolean, animate:any, readFile:Function, saveData:Function, getDataFile:Function}) {
+export default function Wave({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
     const size = 128;
     const MAX_WAVES = 32; // Make sure that there is the same constant in the shaders
     const GRAVITY = 9.81;
@@ -69,6 +69,8 @@ export default function Wave({debug = false, animate, readFile, saveData, getDat
     const mesh = useRef<Mesh>(null!)
     const material = useRef<CustomMaterialType>(null!)
     const dataFiles = useRef<string[]>([]);
+    const animate = useRef(true);
+
 
     // Example of a waves data
     const wavesData1:Wave[] = [
@@ -155,10 +157,10 @@ export default function Wave({debug = false, animate, readFile, saveData, getDat
 
     const vecteurDirection = new Vector2(1.0, 0.0);
     const waveNumber = calculWavenumber(vecteurDirection.x, vecteurDirection.y);
-    const amplitude = 10.0;
+    const amplitude = 12.0;
     const phase = 1;
     const angularFrequency = Math.sqrt(GRAVITY * waveNumber)
-    const waveLength = 50.0;
+    const waveLength = 45.0;
 
     const firstWave = {
                     vecteurDirection: vecteurDirection,
@@ -354,6 +356,26 @@ export default function Wave({debug = false, animate, readFile, saveData, getDat
     }, [])
 
 
+    useEffect(() => {
+    const handleKeyDown = (e:KeyboardEvent) => {
+        if (e.key == " ") {
+          animate.current = !animate.current
+          console.log(animate.current?"The animation is playing":"The animation is paused")
+        } else if (e.key == "d") {
+            material.current.wireframe = !material.current.wireframe;
+        }
+
+      }
+
+
+    document.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+    };
+
+  }, [])
+
     // Clock to animate the shader
     useFrame(({clock}) => {
         if (material.current && animate.current) {
@@ -370,7 +392,6 @@ export default function Wave({debug = false, animate, readFile, saveData, getDat
                 <CustomMaterial 
                     key={CustomShaderMaterial.key} 
                     ref={material}
-                    wireframe={debug} 
                     uniforms={uniforms}
                     transparent={true}
                     
