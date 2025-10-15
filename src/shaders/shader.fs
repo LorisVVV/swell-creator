@@ -33,5 +33,5 @@ void main() {
 	vec3 modelColor = uColor; 
 	vec3 color = modelColor * lighting;
 
-	gl_FragColor = vec4(color, 1.0);
+	gl_FragColor = vec4(color, 0.9);
 }
