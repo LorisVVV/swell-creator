@@ -1,20 +1,13 @@
 in vec3 vPosition;
 in vec3 vNormal;
 
-// in float vIsCrest;
-
-in vec3 vDisplacement;
 uniform vec3 uColor;
-
 
 void main() {
 
 	// Fresnel effect
 	vec3 viewDirection = normalize(cameraPosition - vPosition);
 	float fresnel = dot(viewDirection, vNormal);
-
-	// float indicDisplacement = (vDisplacement.x + vDisplacement.z)/2.0;
-
 
 	// Ambient light
 	vec3 ambientLighting = vec3(0.5, 0.5, 0.5);
@@ -37,9 +30,7 @@ void main() {
 	// Lighting
 	vec3 lighting = ambientLighting *0.5 + diffuseLighting*0.5 + specularLighting*1.0 ;
 
-	// vec3 modelColor = vec3(vec2(-vDisplacement.z),1.0);
 	vec3 modelColor = uColor; 
-	// * vec3(vec2(-vDisplacement.z),1.0);
 	vec3 color = modelColor * lighting;
 
 	gl_FragColor = vec4(color, 1.0);

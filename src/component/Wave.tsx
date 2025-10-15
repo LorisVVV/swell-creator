@@ -20,7 +20,7 @@ function calculWavenumber(x:number, y:number) {
 }
 
 function generateGernsterWave(nbBands:number, firstWave:Wave) {
-    const GRAVITY = 9.81;
+    const GRAVITY = 9.81/2;
 
     let waves:Wave[] = [firstWave]
     let nbWavesByBands = 3;
@@ -35,10 +35,10 @@ function generateGernsterWave(nbBands:number, firstWave:Wave) {
 
             const vecteurDirection = new Vector2(Math.cos(angle * (j + 1)), Math.sin(angle * (j + 1)));
             const waveNumber = calculWavenumber(vecteurDirection.x, vecteurDirection.y);
-            const amplitude = lastWave.amplitude / 2;
+            const amplitude = lastWave.amplitude / 1.3;
             const phase = 1;
             const angularFrequency = Math.sqrt(GRAVITY * waveNumber)
-            const waveLength = lastWave.waveLength / 2;
+            const waveLength = lastWave.waveLength / 1.3;
 
             waves.push(
                 {
@@ -61,7 +61,7 @@ function generateGernsterWave(nbBands:number, firstWave:Wave) {
 }
 
 export default function Wave({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
-    const size = 128;
+    const size = 256;
     const MAX_WAVES = 32; // Make sure that there is the same constant in the shaders
     const GRAVITY = 9.81;
 
@@ -152,15 +152,12 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
         waveLength : 0.0,
     }
 
-
-
-
     const vecteurDirection = new Vector2(1.0, 0.0);
     const waveNumber = calculWavenumber(vecteurDirection.x, vecteurDirection.y);
     const amplitude = 12.0;
     const phase = 1;
     const angularFrequency = Math.sqrt(GRAVITY * waveNumber)
-    const waveLength = 45.0;
+    const waveLength = 80.0;
 
     const firstWave = {
                     vecteurDirection: vecteurDirection,
@@ -194,7 +191,7 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     // Filling the array with empty waves so the lenght is equal to MAX_WAVES
     while (waves.length < MAX_WAVES) {
         waves.push({...emptyWave,
-            vecteurDirection : new Vector2(0.0,0.0)
+            // vecteurDirection : new Vector2(0.0,0.0)
         })
     }
 
