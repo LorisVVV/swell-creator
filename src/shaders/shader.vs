@@ -1,6 +1,7 @@
 
 // Max number of waves
 #define MAX_WAVES 32
+#define PI 3.1415926535
 
 struct Wave {
 	vec2 vecteurDirection;
@@ -20,9 +21,30 @@ uniform int uNbBand;
 // Out
 out vec3 vPosition;
 out vec3 vNormal;
+out vec3 vJacobianMatrix;
+
+void updateJacobianMatrix(Wave currentWave) {
+	float W = (2.0*PI) / currentWave.waveLength;
+	float speed = sqrt(9.8 * W);// Might not work as I divide the gravity
+	float WA = W * currentWave.amplitude;
+	float steepness = (currentWave.amplitude*2.0/currentWave.waveLength) / (WA * currentWave.waveNumber);
+	float QA = steepness * currentWave.amplitude;
+	float vertexDotDirection = dot(position.xy, currentWave.vecteurDirection);
+	float rad = (W * vertexDotDirection) + (speed * currentWave.angularFrequency*uTime); 
+	float sine = sin(rad);
+	float cosine = cos(rad);
+
+	float steepnessWASine = steepness * WA * sine;
+
+	vJacobianMatrix += vec3 (
+		-(steepnessWASine * currentWave.vecteurDirection.x *  currentWave.vecteurDirection.x),
+		-(steepnessWASine * currentWave.vecteurDirection.x *  currentWave.vecteurDirection.y),
+		-(steepnessWASine * currentWave.vecteurDirection.y *  currentWave.vecteurDirection.y)
+	);
+}
 
 // Main function, return a maxtrix 2*3 with first column being the new position of the vertice
-mat2x3 computePositionByBandNewWay(float alpha, float beta, Wave waves[MAX_WAVES], int listSize, float time) {
+mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int listSize, float time) {
 
 	//	Position initialisation
 	vec3 newPosition = vec3(alpha, beta, 0.0);	
@@ -73,6 +95,10 @@ mat2x3 computePositionByBandNewWay(float alpha, float beta, Wave waves[MAX_WAVES
 				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(omBitangent)
 			);
 
+
+			// Jacobian Matrix
+			updateJacobianMatrix(currentwave);
+
 			j++;
 			index++;
 		}
@@ -90,9 +116,13 @@ mat2x3 computePositionByBandNewWay(float alpha, float beta, Wave waves[MAX_WAVES
 	return mat2x3(newPosition, normal);
 }
 
+
+
 void main() {
 
-	mat2x3 positionAndNormal = computePositionByBandNewWay(position.x, position.y, uWaves, uWavesListSize, uTime);
+	vJacobianMatrix = vec3(0.0);
+
+	mat2x3 positionAndNormal = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
 
 	//Calculate position
 	vec3 newPosition = positionAndNormal[0];

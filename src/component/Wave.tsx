@@ -209,140 +209,140 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     // console.dir(uniforms)
 
     // GUI
-    useEffect(() => {
-        // Gui creation
-        const gui = new GUI()
+    // useEffect(() => {
+    //     // Gui creation
+    //     const gui = new GUI()
 
-        if (material.current) {
+    //     if (material.current) {
 
-            // let waves:Wave[] = material.current.uniforms.uWaves.value;
-            let size:number = material.current.uniforms.uWavesListSize.value;
-            let color:Vector3 = material.current.uniforms.uColor.value;
+    //         // let waves:Wave[] = material.current.uniforms.uWaves.value;
+    //         let size:number = material.current.uniforms.uWavesListSize.value;
+    //         let color:Vector3 = material.current.uniforms.uColor.value;
 
-            const colorFormats = {
-                colorWave: { r: color.x, g: color.y, b: color.z },
-            };
+    //         const colorFormats = {
+    //             colorWave: { r: color.x, g: color.y, b: color.z },
+    //         };
 
-            // Object for control 
-            const controlFunction = {
-                addWave() {
-                    if (size <= MAX_WAVES) {
-                        let newSize = size + 1;
-                        material.current.uniforms.uWavesListSize.value = newSize;
-                        wavesListSize = newSize;
-                        size = newSize;
-                    }
-                },
-                removeWave() {
-                    if (size > 0 ) {
-                        let newSize = size - 1;
-                        material.current.uniforms.uWavesListSize.value = newSize;
-                        wavesListSize = newSize;
-                        size = newSize;
-                    }
+    //         // Object for control 
+    //         const controlFunction = {
+    //             addWave() {
+    //                 if (size <= MAX_WAVES) {
+    //                     let newSize = size + 1;
+    //                     material.current.uniforms.uWavesListSize.value = newSize;
+    //                     wavesListSize = newSize;
+    //                     size = newSize;
+    //                 }
+    //             },
+    //             removeWave() {
+    //                 if (size > 0 ) {
+    //                     let newSize = size - 1;
+    //                     material.current.uniforms.uWavesListSize.value = newSize;
+    //                     wavesListSize = newSize;
+    //                     size = newSize;
+    //                 }
 
-                },
-                async loadData() {
-                    const data = await readFile(this.filename);
+    //             },
+    //             async loadData() {
+    //                 const data = await readFile(this.filename);
 
-                    if (data != "nodata") {
-                        const jsonData = JSON.parse(data);
+    //                 if (data != "nodata") {
+    //                     const jsonData = JSON.parse(data);
 
-                        material.current.uniforms.uWaves.value = jsonData.uWaves.value;
-                        material.current.uniforms.uWavesListSize.value = jsonData.uWavesListSize.value;
-                    }
+    //                     material.current.uniforms.uWaves.value = jsonData.uWaves.value;
+    //                     material.current.uniforms.uWavesListSize.value = jsonData.uWavesListSize.value;
+    //                 }
 
-                    wavesFolder.destroy();
-                    wavesFolder = gui.addFolder("Waves");
-                    loadWaveFolder()
-                },
-                async saveData() {
-                    const data = material.current.uniforms;
-                    saveData(JSON.stringify(data))
-                    loadDataFiles()
-                },
-                filename : "none"
-            }
-
-
-            // Load functions
-            function loadWaveFolder() {
-                for (let index = 0; index < wavesListSize; index++) {
-                    const wave = material.current.uniforms.uWaves.value[index];
+    //                 wavesFolder.destroy();
+    //                 wavesFolder = gui.addFolder("Waves");
+    //                 loadWaveFolder()
+    //             },
+    //             async saveData() {
+    //                 const data = material.current.uniforms;
+    //                 saveData(JSON.stringify(data))
+    //                 loadDataFiles()
+    //             },
+    //             filename : "none"
+    //         }
 
 
-                    const itemFolder = wavesFolder.addFolder(`Wave ${index + 1}`);
-                    const VecteurDirection = itemFolder.addFolder(`VecteurDirection`);
-                    VecteurDirection.add(wave.vecteurDirection,"x", -1, 1)
-                                    .onChange( (value:number) => {
-                                        wave.waveNumber= calculWavenumber(value, wave.vecteurDirection.y)
+    //         // Load functions
+    //         function loadWaveFolder() {
+    //             for (let index = 0; index < wavesListSize; index++) {
+    //                 const wave = material.current.uniforms.uWaves.value[index];
+
+
+    //                 const itemFolder = wavesFolder.addFolder(`Wave ${index + 1}`);
+    //                 const VecteurDirection = itemFolder.addFolder(`VecteurDirection`);
+    //                 VecteurDirection.add(wave.vecteurDirection,"x", -1, 1)
+    //                                 .onChange( (value:number) => {
+    //                                     wave.waveNumber= calculWavenumber(value, wave.vecteurDirection.y)
                                         
-                                    } );
-                    VecteurDirection.add(wave.vecteurDirection,"y", -1, 1)
-                                    .onChange( (value:number) => {
-                                        wave.waveNumber= calculWavenumber(wave.vecteurDirection.x, value)
-                                    } );
-                    itemFolder.add(wave, "amplitude",0,10)
-                    itemFolder.add(wave, "angularFrequency", 0, 10);
-                    itemFolder.add(wave, "phase", 0, 10);
-                    itemFolder.add(wave, "waveLength", 0.01, 120);
-                    // itemFolder.onChange(() => {
-                    //     console.log("Uniforms : ")
-                    //     console.dir(material.current.uniforms)
-                    // });
+    //                                 } );
+    //                 VecteurDirection.add(wave.vecteurDirection,"y", -1, 1)
+    //                                 .onChange( (value:number) => {
+    //                                     wave.waveNumber= calculWavenumber(wave.vecteurDirection.x, value)
+    //                                 } );
+    //                 itemFolder.add(wave, "amplitude",0,10)
+    //                 itemFolder.add(wave, "angularFrequency", 0, 10);
+    //                 itemFolder.add(wave, "phase", 0, 10);
+    //                 itemFolder.add(wave, "waveLength", 0.01, 120);
+    //                 // itemFolder.onChange(() => {
+    //                 //     console.log("Uniforms : ")
+    //                 //     console.dir(material.current.uniforms)
+    //                 // });
 
-                    itemFolder.close()
-                }
-            }
+    //                 itemFolder.close()
+    //             }
+    //         }
 
-            async function loadDataFiles() {
-                dataFiles.current = await getDataFile();
+    //         async function loadDataFiles() {
+    //             dataFiles.current = await getDataFile();
                 
-                dataFolderController.options(dataFiles.current)
-                dataFolderController.updateDisplay()
-            }
+    //             dataFolderController.options(dataFiles.current)
+    //             dataFolderController.updateDisplay()
+    //         }
 
-            // Add/Remove wave controls
-            gui.add(controlFunction, "addWave").onChange(() => {
-                wavesFolder.destroy();
-                wavesFolder = gui.addFolder("Waves");
-                loadWaveFolder()
-            });
+    //         // Add/Remove wave controls
+    //         gui.add(controlFunction, "addWave").onChange(() => {
+    //             wavesFolder.destroy();
+    //             wavesFolder = gui.addFolder("Waves");
+    //             loadWaveFolder()
+    //         });
 
-            gui.add(controlFunction, "removeWave").onChange(() => {
-                wavesFolder.destroy();
-                wavesFolder = gui.addFolder("Waves");
-                loadWaveFolder()
-            });
-
-
-            // Colors
-            gui.addColor(colorFormats, "colorWave").onChange(() => {
-                material.current.uniforms.uColor.value = new Vector3(colorFormats.colorWave.r, colorFormats.colorWave.g, colorFormats.colorWave.b)
-            });
-
-            // Data folder
-            const dataFolder = gui.addFolder("dataFolder");
-
-            let dataFolderController = dataFolder.add(controlFunction, 'filename', dataFiles.current)
-
-            loadDataFiles()
-
-            dataFolder.add(controlFunction, "loadData")
-            dataFolder.add(controlFunction, "saveData")
+    //         gui.add(controlFunction, "removeWave").onChange(() => {
+    //             wavesFolder.destroy();
+    //             wavesFolder = gui.addFolder("Waves");
+    //             loadWaveFolder()
+    //         });
 
 
-            // Wave folder
-            let wavesFolder = gui.addFolder("Waves");
-            loadWaveFolder();
+    //         // Colors
+    //         gui.addColor(colorFormats, "colorWave").onChange(() => {
+    //             material.current.uniforms.uColor.value = new Vector3(colorFormats.colorWave.r, colorFormats.colorWave.g, colorFormats.colorWave.b)
+    //         });
 
-        }
+    //         // Data folder
+    //         const dataFolder = gui.addFolder("dataFolder");
 
-        return () => {
-            gui.destroy()
-        }
+    //         let dataFolderController = dataFolder.add(controlFunction, 'filename', dataFiles.current)
 
-    }, [])
+    //         loadDataFiles()
+
+    //         dataFolder.add(controlFunction, "loadData")
+    //         dataFolder.add(controlFunction, "saveData")
+
+
+    //         // Wave folder
+    //         let wavesFolder = gui.addFolder("Waves");
+    //         loadWaveFolder();
+
+    //     }
+
+    //     return () => {
+    //         gui.destroy()
+    //     }
+
+    // }, [])
 
 
     useEffect(() => {
@@ -374,7 +374,7 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     return(
         <>
             <mesh ref={mesh} position={[0, 0, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>
-                <planeGeometry args={[size, size, size/2, size/2]}/>
+                <planeGeometry args={[size, size, size/1.5, size/1.5]}/>
                 <CustomMaterial 
                     key={CustomShaderMaterial.key} 
                     ref={material}

@@ -1,5 +1,6 @@
 in vec3 vPosition;
 in vec3 vNormal;
+in vec3 vJacobianMatrix;
 
 uniform vec3 uColor;
 
@@ -24,11 +25,18 @@ void main() {
 	vec3 viewSource = normalize(cameraSource);
 	vec3 reflectSource = normalize(reflect(-lightCoord, normal));
 	float speculareStrength = max(0.0, dot(viewSource, reflectSource));
-	speculareStrength = pow(speculareStrength, 32.0);
+	speculareStrength = pow(speculareStrength, 64.0);
 	vec3 specularLighting = speculareStrength * lightColor;
 
 	// Lighting
 	vec3 lighting = ambientLighting *0.5 + diffuseLighting*0.5 + specularLighting*1.0 ;
+
+	// Foam
+	float jacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.z - vJacobianMatrix.y * vJacobianMatrix.y;
+	// vec3 foam = clamp(vec3(1.0)-jacobianDeterminent,0.0,1.0);
+
+	// Depth
+	// float depth = clamp(-vPosition.z, 0.5, 1.0);
 
 	vec3 modelColor = uColor; 
 	vec3 color = modelColor * lighting;

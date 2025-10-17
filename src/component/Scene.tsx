@@ -1,18 +1,13 @@
 "use client"
 
 import styles from "./page.module.css";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import Wave from "@/component/Wave";
 import { OrbitControls } from "@react-three/drei";
 import FPSStats from "react-fps-stats";
 import { Environment } from '@react-three/drei';
-import { useEffect, useRef } from "react";
 
 export default function Scene({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
-  
-
-
-  
 
   return (
         <div className={styles.scene}>
@@ -28,7 +23,7 @@ export default function Scene({readFile, saveData, getDataFile}:{readFile:Functi
             >
 
               <OrbitControls/>   
-              {/* <Environment preset="dawn" background /> */}
+              <Environment files={"/qwantani_noon_puresky_4k.exr"} background />
               <ambientLight intensity={1} />
 
               <directionalLight
