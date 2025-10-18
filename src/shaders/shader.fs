@@ -1,7 +1,11 @@
+// in
 in vec3 vPosition;
 in vec3 vNormal;
 in vec3 vJacobianMatrix;
+in float depth;
 
+// Uniforms
+uniform sampler2D uFoamTexture;
 uniform vec3 uColor;
 
 void main() {
@@ -29,16 +33,19 @@ void main() {
 	vec3 specularLighting = speculareStrength * lightColor;
 
 	// Lighting
-	vec3 lighting = ambientLighting *0.5 + diffuseLighting*0.5 + specularLighting*1.0 ;
+	vec3 lighting = ambientLighting *0.5 + diffuseLighting*0.5 + specularLighting*0.5 ;
 
 	// Foam
 	float jacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.z - vJacobianMatrix.y * vJacobianMatrix.y;
 	// vec3 foam = clamp(vec3(1.0)-jacobianDeterminent,0.0,1.0);
+	// float foamTexture = ;
 
 	// Depth
-	// float depth = clamp(-vPosition.z, 0.5, 1.0);
+	vec3 colorShallow = vec3(72.0/255.0, 202.0/255.0, 228.0/255.0);
+	vec3 amountOfColorShallow = colorShallow * depth *0.25;
 
-	vec3 modelColor = uColor; 
+	// Color
+	vec3 modelColor = uColor + amountOfColorShallow; 
 	vec3 color = modelColor * lighting;
 
 	gl_FragColor = vec4(color, 0.9);

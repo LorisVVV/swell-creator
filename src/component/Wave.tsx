@@ -1,9 +1,10 @@
-import {useFrame } from "@react-three/fiber";
+import {useFrame, useLoader } from "@react-three/fiber";
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CustomMaterial, CustomShaderMaterial, CustomMaterialType } from '../shaders/shaderMaterial'
-import { Mesh, Vector2, Vector3 } from "three";
+import { Mesh, TextureLoader, Vector2, Vector3 } from "three";
 import GUI from "lil-gui";
-
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
+// import { GLTFLoader } from '@three/examples/jsm/loaders/GLTFLoader';
 
 interface Wave {
     vecteurDirection : Vector2 ,
@@ -172,9 +173,9 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     const generateWaves = generateGernsterWave(3, firstWave);
     
     
-    console.dir(
-        generateWaves
-    )
+    // console.dir(
+    //     generateWaves
+    // )
 
     // Main array, put all your waves in there
     const waves:Wave[] = [...generateWaves]
@@ -186,6 +187,9 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     while (waves.length < MAX_WAVES) {
         waves.push({...emptyWave})
     }
+
+    // Texture
+    const foamTexture = useLoader(TextureLoader, "/foamTexture.jpg");
 
     // Uniforms to send to the shader
     const uniforms = {
@@ -203,6 +207,9 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
         },
         uNbBand : {
             value : 3.0
+        },
+        uFoamTexture : {
+            value : foamTexture
         }
     }
 
@@ -343,6 +350,7 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     //     }
 
     // }, [])
+
 
 
     useEffect(() => {

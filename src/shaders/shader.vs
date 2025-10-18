@@ -22,6 +22,7 @@ uniform int uNbBand;
 out vec3 vPosition;
 out vec3 vNormal;
 out vec3 vJacobianMatrix;
+out float depth;
 
 void updateJacobianMatrix(Wave currentWave) {
 	float W = (2.0*PI) / currentWave.waveLength;
@@ -75,24 +76,24 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 			float om = currentwave.vecteurDirection.x * newPosition.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * newPosition.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time - currentwave.phase;
 			waveOffSet += vec3( 
 				(currentwave.vecteurDirection.x / currentwave.waveNumber ) * currentwave.amplitude * sin(om),
-				currentwave.amplitude * cos(om), 
-				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(om)
+				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(om),
+				currentwave.amplitude * cos(om)
 			);
 
 			// Offset of the tangent
 			float omTangent = currentwave.vecteurDirection.x * tangent.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * tangent.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time - currentwave.phase;
 			waveOffSetTangent += vec3(
 				(currentwave.vecteurDirection.x / currentwave.waveNumber ) * currentwave.amplitude * sin(omTangent),
-				currentwave.amplitude * cos(omTangent),
-				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(omTangent)
+				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(omTangent),
+				currentwave.amplitude * cos(omTangent)
 			);
 
 			// Offset of the bitangent
 			float omBitangent = currentwave.vecteurDirection.x * bitangent.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * bitangent.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time - currentwave.phase;
 			waveOffSetBitangent += vec3(
 				(currentwave.vecteurDirection.x / currentwave.waveNumber ) * currentwave.amplitude * sin(omBitangent),
-				currentwave.amplitude * cos(omBitangent),
-				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(omBitangent)
+				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(omBitangent),
+				currentwave.amplitude * cos(omBitangent)
 			);
 
 
@@ -103,10 +104,9 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 			index++;
 		}
 
-		//   /!\ Switching y and z
-		newPosition = vec3(newPosition.x - waveOffSet.x, newPosition.y - waveOffSet.z, newPosition.z+waveOffSet.y);
-		tangent = vec3(tangent.x - waveOffSetTangent.x, tangent.y - waveOffSetTangent.z, tangent.z+waveOffSetTangent.y);
-		bitangent = vec3(bitangent.x - waveOffSetBitangent.x, bitangent.y - waveOffSetBitangent.z, bitangent.z+waveOffSetBitangent.y);
+		newPosition = vec3(newPosition.x - waveOffSet.x, newPosition.y - waveOffSet.y, newPosition.z+waveOffSet.z);
+		tangent = vec3(tangent.x - waveOffSetTangent.x, tangent.y - waveOffSetTangent.y, tangent.z+waveOffSetTangent.z);
+		bitangent = vec3(bitangent.x - waveOffSetBitangent.x, bitangent.y - waveOffSetBitangent.y, bitangent.z+waveOffSetBitangent.z);
 	
 		bandSize = bandSize + 2;
 	}
@@ -124,14 +124,20 @@ void main() {
 
 	mat2x3 positionAndNormal = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
 
-	//Calculate position
+	//Calculate position, normal and displacement;
 	vec3 newPosition = positionAndNormal[0];
-
 	vec3 normal = positionAndNormal[1];
+	
+	depth = (position.z + newPosition.z) / uWaves[0].amplitude;
+	
+	// vec3 displacement = position + newPosition;
 
+
+
+	// Passing varying to fragment shader
 	vNormal = normal;
-
 	vPosition = newPosition;
+
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition.xyz, 1.0 );
 }
