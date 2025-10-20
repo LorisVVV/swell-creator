@@ -6,14 +6,15 @@ import Wave from "@/component/Wave";
 import { OrbitControls } from "@react-three/drei";
 import FPSStats from "react-fps-stats";
 import { Environment } from '@react-three/drei';
+import { Stats } from "@react-three/drei";
 
 export default function Scene({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
 
   return (
         <div className={styles.scene}>
 
-          <FPSStats />
-          
+          {/* <FPSStats /> */}
+          <Stats showPanel={0} className="stats" />
           <Canvas
               shadows
               className={styles.canvas}
@@ -23,24 +24,9 @@ export default function Scene({readFile, saveData, getDataFile}:{readFile:Functi
             >
 
               <OrbitControls/>   
-              <Environment files={"/qwantani_noon_puresky_4k.exr"} background />
-              <ambientLight intensity={1} />
+              <Environment files={"/env1K.hdr"} background/>
+              {/* <ambientLight intensity={1} /> */}
 
-              <directionalLight
-                castShadow
-                receiveShadow
-                position={[12, 1, 2]}
-             
-                intensity={4}
-                shadow-mapSize={[4096, 4096]}
-                shadow-bias={-0.0001}
-
-                shadow-camera-left={-20}
-                shadow-camera-right={20}
-                shadow-camera-top={20}
-                shadow-camera-bottom={-20}
-              
-                />
 
 
               <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile} />
