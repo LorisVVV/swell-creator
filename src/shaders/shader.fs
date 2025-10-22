@@ -36,26 +36,27 @@ void main() {
 	vec3 specularLighting = speculareStrength * lightColor;
 
 	// Lighting
-	vec3 lighting = ambientLighting *0.5 + diffuseLighting*0.25 + specularLighting*0.5 ;
+	vec3 lighting = ambientLighting *0.5 + diffuseLighting*0.25 + specularLighting*0.25 ;
 
 	// Foam
-	float jacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.z - vJacobianMatrix.y * vJacobianMatrix.y;
+	float jacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.y - vJacobianMatrix.z * vJacobianMatrix.z;
 	vec2 textCoord = vec2(1.0,1.0);
 	float foamAmount = clamp(1.0-jacobianDeterminent,0.0,1.0);
-	vec3 foamColor = texture(uFoamTexture, textCoord).rgb * foamAmount;
+	// vec3 foamColor = texture(uFoamTexture, textCoord).rgb * foamAmount;
 
 	// Depth
-	vec3 amountOfColorShallow = uColorShallow * depth * 0.25;
+	vec3 amountOfColorShallow = uColorShallow * depth / 4.0;
+	// float newDepth = (depth + 1.0)/2.0;
 
 	// Reflection
 	vec3 reflectVector = reflect(cameraPosition - vPosition, normal);
 	vec3 colorReflected = texture(uEnvironment, reflectVector).rgb;
 
 	// Color
-	vec3 modelColor = (uColor + amountOfColorShallow); 
-	// vec3 modelColor = test; 
+	// vec3 modelColor = mix(uColor, uColorShallow, newDepth ); 
+	vec3 modelColor = uColor + amountOfColorShallow ; 
 	vec3 color = mix(modelColor, colorReflected, 0.04) * lighting;
 
 	// Modifying the actual color
-	gl_FragColor = vec4(color, 0.90);
+	gl_FragColor = vec4(color, 0.95);
 }

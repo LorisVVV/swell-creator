@@ -120,7 +120,7 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 
 void main() {
 
-	vJacobianMatrix = vec3(0.0);
+	vJacobianMatrix = vec3(1.0,1.0,0.0);
 
 	mat2x3 positionAndNormal = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
 

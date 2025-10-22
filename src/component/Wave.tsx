@@ -62,7 +62,7 @@ function generateGernsterWave(nbBands:number, firstWave:Wave) {
 }
 
 export default function Wave({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
-    const size = 1024;
+    const size = 600;
     const MAX_WAVES = 32; // Make sure that there is the same constant in the shaders
     const GRAVITY = 9.81;
 
@@ -375,8 +375,8 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     useEffect(() => {
         const handleKeyDown = (e:KeyboardEvent) => {
             if (e.key == " ") {
-            animate.current = !animate.current
-            console.log(animate.current?"The animation is playing":"The animation is paused")
+                animate.current = !animate.current
+                console.log(animate.current?"The animation is playing":"The animation is paused")
             } else if (e.key == "d") {
                 material.current.wireframe = !material.current.wireframe;
             }
