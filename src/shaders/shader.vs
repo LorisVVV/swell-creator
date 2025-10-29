@@ -22,11 +22,13 @@ uniform int uNbBand;
 out vec3 vPosition;
 out vec3 vNormal;
 out vec3 vJacobianMatrix;
-out float depth;
+out float vJacobianDeterminent;
+out float vDepth;
 
 void updateJacobianMatrix(Wave currentWave) {
+
 	float W = (2.0*PI) / currentWave.waveLength;
-	float speed = sqrt(9.8 * W);// Might not work as I divide the gravity
+	float speed = sqrt(9.8 * W);
 	float WA = W * currentWave.amplitude;
 	float steepness = (currentWave.amplitude*2.0/currentWave.waveLength) / (WA * currentWave.waveNumber);
 	float QA = steepness * currentWave.amplitude;
@@ -116,11 +118,9 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 	return mat2x3(newPosition, normal);
 }
 
-
-
 void main() {
 
-	vJacobianMatrix = vec3(1.0,1.0,0.0);
+	vJacobianMatrix = vec3(1.0,0.0,1.0);
 
 	mat2x3 positionAndNormal = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
 
@@ -128,7 +128,7 @@ void main() {
 	vec3 newPosition = positionAndNormal[0];
 	vec3 normal = positionAndNormal[1];
 	
-	depth = (position.z + newPosition.z) / uWaves[0].amplitude;
+	vDepth = newPosition.z / uWaves[0].amplitude;
 	
 	// vec3 displacement = position + newPosition;
 
@@ -137,6 +137,7 @@ void main() {
 	// Passing varying to fragment shader
 	vNormal = normal;
 	vPosition = newPosition;
+	vJacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.y - vJacobianMatrix.z * vJacobianMatrix.z;
 
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition.xyz, 1.0 );

@@ -62,7 +62,7 @@ function generateGernsterWave(nbBands:number, firstWave:Wave) {
 }
 
 export default function Wave({readFile, saveData, getDataFile}:{readFile:Function, saveData:Function, getDataFile:Function}) {
-    const size = 600;
+    const size = 1024;
     const MAX_WAVES = 32; // Make sure that there is the same constant in the shaders
     const GRAVITY = 9.81;
 
@@ -171,11 +171,7 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
 
 
     const generateWaves = generateGernsterWave(3, firstWave);
-    
-    
-    // console.dir(
-    //     generateWaves
-    // )
+
 
     // Main array, put all your waves in there
     const waves:Wave[] = [...generateWaves]
@@ -191,6 +187,7 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     // Texture and hdr
     const foamTexture = useLoader(TextureLoader, "/foamTexture.jpg");
     const envTexture = useLoader(HDRLoader, "/env1K.hdr")
+
     // Uniforms to send to the shader
     const uniforms = {
         uWavesListSize : {
@@ -221,8 +218,6 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
             value : new Vector3(72.0/255.0, 202.0/255.0, 228.0/255.0)
         }
     }
-
-    // console.dir(uniforms)
 
     // GUI
     useEffect(() => {
@@ -379,10 +374,12 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
                 console.log(animate.current?"The animation is playing":"The animation is paused")
             } else if (e.key == "d") {
                 material.current.wireframe = !material.current.wireframe;
+                console.log(material.current.wireframe?"The animation is in wireframe":"The animation is not in wireframe")
             }
+            e.stopPropagation();
         }
 
-        document.addEventListener('keydown', handleKeyDown, true);
+        document.addEventListener('keydown', handleKeyDown);
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
