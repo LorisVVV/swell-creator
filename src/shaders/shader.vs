@@ -25,17 +25,17 @@ out vec3 vJacobianMatrix;
 out float vJacobianDeterminent;
 out float vDepth;
 
-void updateJacobianMatrix(Wave currentWave) {
+void updateJacobianMatrix(Wave currentWave, vec3 newPosition, float currentWaveOm) {
 
 	float W = (2.0*PI) / currentWave.waveLength;
 	float speed = sqrt(9.8 * W);
 	float WA = W * currentWave.amplitude;
 	float steepness = (currentWave.amplitude*2.0/currentWave.waveLength) / (WA * currentWave.waveNumber);
-	float QA = steepness * currentWave.amplitude;
+	// float QA = steepness * currentWave.amplitude;
 	float vertexDotDirection = dot(position.xy, currentWave.vecteurDirection);
 	float rad = (W * vertexDotDirection) + (speed * currentWave.angularFrequency*uTime); 
 	float sine = sin(rad);
-	float cosine = cos(rad);
+	// float cosine = cos(rad);
 
 	float steepnessWASine = steepness * WA * sine;
 
@@ -47,7 +47,7 @@ void updateJacobianMatrix(Wave currentWave) {
 }
 
 // Main function, return a maxtrix 2*3 with first column being the new position of the vertice
-mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int listSize, float time) {
+mat4x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int listSize, float time) {
 
 	//	Position initialisation
 	vec3 newPosition = vec3(alpha, beta, 0.0);	
@@ -75,7 +75,7 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 			// Real wave length
 
 			// Offset of the actual position
-			float om = currentwave.vecteurDirection.x * newPosition.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * newPosition.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time - currentwave.phase;
+			float om = currentwave.vecteurDirection.x * newPosition.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * newPosition.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time;
 			waveOffSet += vec3( 
 				(currentwave.vecteurDirection.x / currentwave.waveNumber ) * currentwave.amplitude * sin(om),
 				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(om),
@@ -83,7 +83,7 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 			);
 
 			// Offset of the tangent
-			float omTangent = currentwave.vecteurDirection.x * tangent.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * tangent.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time - currentwave.phase;
+			float omTangent = currentwave.vecteurDirection.x * tangent.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * tangent.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time;
 			waveOffSetTangent += vec3(
 				(currentwave.vecteurDirection.x / currentwave.waveNumber ) * currentwave.amplitude * sin(omTangent),
 				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(omTangent),
@@ -91,7 +91,7 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 			);
 
 			// Offset of the bitangent
-			float omBitangent = currentwave.vecteurDirection.x * bitangent.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * bitangent.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time - currentwave.phase;
+			float omBitangent = currentwave.vecteurDirection.x * bitangent.x * (1.0/currentwave.waveLength) + currentwave.vecteurDirection.y * bitangent.y * (1.0/currentwave.waveLength)  - currentwave.angularFrequency * time;
 			waveOffSetBitangent += vec3(
 				(currentwave.vecteurDirection.x / currentwave.waveNumber ) * currentwave.amplitude * sin(omBitangent),
 				(currentwave.vecteurDirection.y / currentwave.waveNumber ) * currentwave.amplitude * sin(omBitangent),
@@ -100,8 +100,9 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 
 
 			// Jacobian Matrix
-			updateJacobianMatrix(currentwave);
+			updateJacobianMatrix(currentwave, newPosition, om);
 
+			// Incrementation of the index
 			j++;
 			index++;
 		}
@@ -115,30 +116,28 @@ mat2x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 	tangent -= newPosition;
 	bitangent -= newPosition;
 	vec3 normal = normalize(cross(tangent, bitangent));
-	return mat2x3(newPosition, normal);
+	return mat4x3(newPosition, normal, tangent, bitangent);
 }
 
 void main() {
 
 	vJacobianMatrix = vec3(1.0,0.0,1.0);
 
-	mat2x3 positionAndNormal = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
-
-	//Calculate position, normal and displacement;
-	vec3 newPosition = positionAndNormal[0];
-	vec3 normal = positionAndNormal[1];
-	
-	vDepth = newPosition.z / uWaves[0].amplitude;
-	
-	// vec3 displacement = position + newPosition;
-
-
+	mat4x3 positionNormalTangentBitangent = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
 
 	// Passing varying to fragment shader
-	vNormal = normal;
-	vPosition = newPosition;
-	vJacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.y - vJacobianMatrix.z * vJacobianMatrix.z;
+	vPosition = positionNormalTangentBitangent[0];
 
 
-	gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition.xyz, 1.0 );
+	float maxHeight = uWaves[0].amplitude + uWaves[1].amplitude*3.0 + uWaves[4].amplitude*5.0 + uWaves[9].amplitude*7.0;
+	// vDepth =  clamp((vPosition.z+maxHeight)/(maxHeight+maxHeight), 0.0, 1.0);
+	vDepth =  vPosition.z/uWaves[0].amplitude;
+	vNormal = positionNormalTangentBitangent[1];
+	vec3 tangent = positionNormalTangentBitangent[2];
+	vec3 bitangent = positionNormalTangentBitangent[3];
+	vJacobianDeterminent = bitangent.x * tangent.y - tangent.x * tangent.x ;
+	// vJacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.y - vJacobianMatrix.z * vJacobianMatrix.z;
+
+
+	gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition.xyz, 1.0 );
 }

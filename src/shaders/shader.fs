@@ -41,26 +41,29 @@ void main() {
 
 	// Foam
 	vec2 textCoord = vPosition.xy - floor(vPosition.xy);
-	float foamAmount = clamp(-vJacobianDeterminent,0.0,1.0);
+	float foamAmount = clamp(1.0-vJacobianDeterminent,0.0,1.0);
 	vec3 foamColor = texture(uFoamTexture, textCoord).rgb ;
+	vec3 foam = clamp( vec3(1.0)-vJacobianDeterminent,0.0,1.0);
 
 
 	// Depth
-	vec3 amountOfColorShallow = uColorShallow * vDepth / 4.0;
-	// float newDepth = (depth + 1.0)/2.0;
+	vec3 amountOfColorShallow = uColorShallow * vDepth/4.0;
+
 
 	// Reflection
 	vec3 reflectVector = reflect(cameraPosition - vPosition, normal);
 	vec3 colorReflected = texture(uEnvironment, reflectVector).rgb;
 
 	// Color
-	// vec3 modelColor = mix(uColor, uColorShallow, newDepth ); 
-	vec3 modelColor = uColor + amountOfColorShallow + vec3(1.0) * foamAmount; 
+	// vec3 newmodelColor = mix(vec3(0.0), vec3(1.0), vDepth ); 
+	// vec3 modelColor = uColor; 
+	vec3 modelColor = uColor + amountOfColorShallow + foam; 
 
 	// vec3 test = mix(modelColor, foamColor, foamAmount);
 
 	vec3 color = mix(modelColor, colorReflected, 0.04) * lighting;
 
 	// Modifying the actual color
+	// gl_FragColor = vec4(vec3(vDepth), 0.95);
 	gl_FragColor = vec4(color, 0.95);
 }

@@ -19,7 +19,7 @@ export default function Scene({readFile, saveData, getDataFile}:{readFile:Functi
               shadows
               className={styles.canvas}
               camera={{
-                position: [-6, 7, 7],
+                position: [-6, 10, 20],
               }}
             >
 
@@ -31,7 +31,7 @@ export default function Scene({readFile, saveData, getDataFile}:{readFile:Functi
 
               <Wave readFile={readFile} saveData={saveData} getDataFile={getDataFile} />
 
-              {/* <mesh position={[0, 1.244, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>
+              {/* <mesh position={[0, 0, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>
                 <planeGeometry args={[100, 100, 100, 100]}/>
                 <shaderMaterial 
                 wireframe/>
