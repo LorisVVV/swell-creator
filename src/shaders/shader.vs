@@ -27,22 +27,28 @@ out float vDepth;
 
 void updateJacobianMatrix(Wave currentWave, vec3 newPosition, float currentWaveOm) {
 
-	float W = (2.0*PI) / currentWave.waveLength;
-	float speed = sqrt(9.8 * W);
-	float WA = W * currentWave.amplitude;
-	float steepness = (currentWave.amplitude*2.0/currentWave.waveLength) / (WA * currentWave.waveNumber);
-	// float QA = steepness * currentWave.amplitude;
-	float vertexDotDirection = dot(position.xy, currentWave.vecteurDirection);
-	float rad = (W * vertexDotDirection) + (speed * currentWave.angularFrequency*uTime); 
-	float sine = sin(rad);
-	// float cosine = cos(rad);
+	// float W = (2.0*PI) / currentWave.waveLength;
+	// float speed = sqrt(9.8 * W);
+	// float WA = W * currentWave.amplitude;
+	// float steepness = (currentWave.amplitude*2.0/currentWave.waveLength) / (WA * currentWave.waveNumber);
+	// // float QA = steepness * currentWave.amplitude;
+	// float vertexDotDirection = dot(position.xy, currentWave.vecteurDirection);
+	// float rad = (W * vertexDotDirection) + (speed * currentWave.angularFrequency*uTime); 
+	// float sine = sin(rad);
+	// // float cosine = cos(rad);
 
-	float steepnessWASine = steepness * WA * sine;
+	// float steepnessWASine = steepness * WA * sine;
+
+	// vJacobianMatrix += vec3 (
+	// 	-(steepnessWASine * currentWave.vecteurDirection.x *  currentWave.vecteurDirection.x),
+	// 	-(steepnessWASine * currentWave.vecteurDirection.x *  currentWave.vecteurDirection.y),
+	// 	-(steepnessWASine * currentWave.vecteurDirection.y *  currentWave.vecteurDirection.y)
+	// );
 
 	vJacobianMatrix += vec3 (
-		-(steepnessWASine * currentWave.vecteurDirection.x *  currentWave.vecteurDirection.x),
-		-(steepnessWASine * currentWave.vecteurDirection.x *  currentWave.vecteurDirection.y),
-		-(steepnessWASine * currentWave.vecteurDirection.y *  currentWave.vecteurDirection.y)
+		-(pow(currentWave.vecteurDirection.x, 2.0)/currentWave.waveNumber)*currentWave.amplitude*cos(currentWaveOm) ,
+		-(pow(currentWave.vecteurDirection.y, 2.0)/currentWave.waveNumber)*currentWave.amplitude*cos(currentWaveOm),
+		-((currentWave.vecteurDirection.x * currentWave.vecteurDirection.y)/currentWave.waveNumber)*currentWave.amplitude*cos(currentWaveOm)
 	);
 }
 
@@ -121,7 +127,7 @@ mat4x3 computePositionByBand(float alpha, float beta, Wave waves[MAX_WAVES], int
 
 void main() {
 
-	vJacobianMatrix = vec3(1.0,0.0,1.0);
+	vJacobianMatrix = vec3(1.0,1.0,0.0);
 
 	mat4x3 positionNormalTangentBitangent = computePositionByBand(position.x, position.y, uWaves, uWavesListSize, uTime);
 
@@ -135,8 +141,11 @@ void main() {
 	vNormal = positionNormalTangentBitangent[1];
 	vec3 tangent = positionNormalTangentBitangent[2];
 	vec3 bitangent = positionNormalTangentBitangent[3];
-	vJacobianDeterminent = bitangent.x * tangent.y - tangent.x * tangent.x ;
-	// vJacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.y - vJacobianMatrix.z * vJacobianMatrix.z;
+	// vJacobianDeterminent = bitangent.x * tangent.y - tangent.x * tangent.x ;
+
+
+	
+	vJacobianDeterminent = vJacobianMatrix.x * vJacobianMatrix.y - vJacobianMatrix.z * vJacobianMatrix.z;
 
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition.xyz, 1.0 );

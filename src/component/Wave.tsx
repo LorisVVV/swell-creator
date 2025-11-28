@@ -398,7 +398,7 @@ export default function Wave({readFile, saveData, getDataFile}:{readFile:Functio
     return(
         <>
             <mesh ref={mesh} position={[0, 0, 0]} rotation={[-Math.PI/2, 0, 0]} castShadow receiveShadow>
-                <planeGeometry args={[size, size, size/1.5, size/1.5]}/>
+                <planeGeometry args={[size, size, size/2, size/2]}/>
                 <CustomMaterial 
                     key={CustomShaderMaterial.key} 
                     ref={material}

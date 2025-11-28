@@ -43,7 +43,7 @@ void main() {
 	vec2 textCoord = vPosition.xy - floor(vPosition.xy);
 	float foamAmount = clamp(1.0-vJacobianDeterminent,0.0,1.0);
 	vec3 foamColor = texture(uFoamTexture, textCoord).rgb ;
-	vec3 foam = clamp( vec3(1.0)-vJacobianDeterminent,0.0,1.0);
+	// vec3 foam = clamp( vec3(1.0)-vJacobianDeterminent,0.0,1.0);
 
 
 	// Depth
@@ -57,7 +57,7 @@ void main() {
 	// Color
 	// vec3 newmodelColor = mix(vec3(0.0), vec3(1.0), vDepth ); 
 	// vec3 modelColor = uColor; 
-	vec3 modelColor = uColor + amountOfColorShallow + foam; 
+	vec3 modelColor = uColor + amountOfColorShallow + vec3(1.0)*foamAmount; 
 
 	// vec3 test = mix(modelColor, foamColor, foamAmount);
 
